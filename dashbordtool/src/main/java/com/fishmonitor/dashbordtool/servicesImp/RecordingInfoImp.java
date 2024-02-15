@@ -83,8 +83,8 @@ public class RecordingInfoImp implements RecordingMeth {
 			}else {
 			List<Map<String, Object>> dayAndHourList = recordSummaryDTOList.stream().map(entry -> {
 				HashMap<String, Object> mapData = new HashMap<String, Object>();
-				
-				mapData.put("day", entry.getDay());
+				mapData.put("recordDate", entry.getDay());
+				mapData.put("cameraName", cameraName);
 				List<HourSummaryDTO> hoursList = (List<HourSummaryDTO>) entry.getHours();
 				List<Map<String, Object>> hourValues = hoursList.stream().map(hourEntry -> {
 					 StringBuilder stringBuilder = new StringBuilder();
@@ -96,7 +96,7 @@ public class RecordingInfoImp implements RecordingMeth {
 					hoursInfo.put("path", stringBuilder);
 					return hoursInfo;
 				}).collect(Collectors.toList());
-				mapData.put("hours", hourValues);
+				mapData.put("hoursList", hourValues);
 				return mapData;
 			}).collect(Collectors.toList());
 			return new ResponseEntity<>(new ResponesObject(200, "success", "Successfully loaded data", dayAndHourList),
