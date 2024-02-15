@@ -39,19 +39,23 @@ public class RecordingInfo {
 	public RecordingInfo( RecordingMeth recordingMeth) {
 		this.recordingMeth=recordingMeth;
 	}
+	@GetMapping(value="/listOfVideoinfo")
+	public ResponseEntity<?> getVideoInformation(@RequestParam String cameraName,@RequestParam(required = false) String starDate,@RequestParam(required = false) String endDate ){
+		return recordingMeth.getRecordInfoList(cameraName,starDate,endDate);
+	}
+	
 	@GetMapping(value="/videoPath")
     public ResponseEntity<?> getlistVideoPaths(@RequestParam String subPath){
 		return recordingMeth.getListOfVideoPath(subPath);
 	}
 	
-	@GetMapping(value="/listOfVideoinfo")
-	public ResponseEntity<?> getVideoInformation(@RequestParam String cameraName,@RequestParam String starDate,@RequestParam String endDate ){
-		return recordingMeth.getRecordInfoList(cameraName,starDate,endDate);
-	}
-	
 	@GetMapping(value="/getRecordingClip")
 	public ResponseEntity<?> getRecodingClip(@RequestParam String sourcePath){
 		return recordingMeth.getSourceVideo(sourcePath);
+	}
+	@GetMapping(value= "/listOfCameras")
+	public ResponseEntity<?> getListOfCamers(){
+		return recordingMeth.getListOfCams();
 	}
 	
 }

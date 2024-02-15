@@ -22,6 +22,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -63,7 +66,8 @@ public class RecordingInfoImp implements RecordingMeth {
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		HttpEntity<Object> requestEntity = new HttpEntity<>(headers);
 		String url = "http://localhost:5000/api/%s/recordings/summary";
-		HashMap map = new HashMap();
+		HashMap<Object, Object> map = new HashMap<Object, Object>();
+		try {
 		ResponseEntity<String> responesData = restTemplate.exchange(String.format(url, cameraName), HttpMethod.GET,
 				requestEntity, String.class);
 		String userInfo = responesData.getBody();
@@ -73,15 +77,23 @@ public class RecordingInfoImp implements RecordingMeth {
 			List<RecordSummaryDTO> recordSummaryDTOList = objectMapper.readValue(userInfo,
 					new TypeReference<List<RecordSummaryDTO>>() {
 					});
+			if(recordSummaryDTOList.isEmpty()&& recordSummaryDTOList.size()==0) {
+				return new ResponseEntity<>(new ResponesObject(200, "error", "No Data found", null),
+						HttpStatus.OK);
+			}else {
 			List<Map<String, Object>> dayAndHourList = recordSummaryDTOList.stream().map(entry -> {
 				HashMap<String, Object> mapData = new HashMap<String, Object>();
+				
 				mapData.put("day", entry.getDay());
 				List<HourSummaryDTO> hoursList = (List<HourSummaryDTO>) entry.getHours();
 				List<Map<String, Object>> hourValues = hoursList.stream().map(hourEntry -> {
+					 StringBuilder stringBuilder = new StringBuilder();
 					HashMap<String, Object> hoursInfo = new HashMap<String, Object>();
 					hoursInfo.put("hour", hourEntry.getHour());
-					String pathRef = "/recordings/" + entry.getDay() + "/" + hourEntry.getHour() + "/" + cameraName;
-					hoursInfo.put("path", pathRef);
+					stringBuilder.append("/recordings/").append(entry.getDay()).append("/").append(hourEntry.getHour()).append("/").append(cameraName);
+//					 System.out.println(stringBuilder);
+//					 String pathRef = "/recordings/" + entry.getDay() + "/" + hourEntry.getHour() + "/" + cameraName;
+					hoursInfo.put("path", stringBuilder);
 					return hoursInfo;
 				}).collect(Collectors.toList());
 				mapData.put("hours", hourValues);
@@ -89,18 +101,30 @@ public class RecordingInfoImp implements RecordingMeth {
 			}).collect(Collectors.toList());
 			return new ResponseEntity<>(new ResponesObject(200, "success", "Successfully loaded data", dayAndHourList),
 					HttpStatus.OK);
+			}
 		} catch (Exception e) {
 			System.out.println("check error" + e.getMessage());
+			return new ResponseEntity<>(new ResponesObject(500,"error",e.getMessage(),null),HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-
-		return null;
-
+		}
+		catch(HttpClientErrorException e ) {
+			System.out.println("client said error "+e.getMessage());
+			return new ResponseEntity<>(new ResponesObject(500,"error",e.getResponseBodyAsString(),null),HttpStatus.BAD_GATEWAY);
+		}
+		catch(HttpServerErrorException e) {
+			System.out.println("Server said error "+e.getMessage());
+			return new ResponseEntity<>(new ResponesObject(500,"error",e.getResponseBodyAsString(),null),HttpStatus.BAD_GATEWAY);
+		}
+		catch(ResourceAccessException e) {
+		System.out.println("Access outsourec error"+e.getMessage());
+		return new ResponseEntity<>(new ResponesObject(500,"error",e.getMessage(),null),HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 
 	@Override
 	public ResponseEntity<?> getSourceVideo(String sourceRootPath) {
 		// TODO Auto-generated method stub
-
+		System.out.println("soure path"+sourceRootPath);
 		try {
 			Path fileInfo = Paths.get(buildPath(fileRootPath ,sourceRootPath));
 			Resource resource = new FileSystemResource(buildPath(fileRootPath ,sourceRootPath));
@@ -118,9 +142,25 @@ public class RecordingInfoImp implements RecordingMeth {
 	public ResponseEntity<?> getListOfVideoPath(String subPath) {
 		// Build path using varargs
 		String filePath = buildPath(subPath);
+		System.out.println("filePath"+filePath);
 		FileInfo fileInfo = new FileInfo();
 		return new ResponseEntity<>(new ResponesObject(200, "success", "success", fileInfo.getFilePath(filePath,subPath)),
 				HttpStatus.ACCEPTED);
 	}
-
+	@Override
+	public ResponseEntity<?> getListOfCams(){
+		try {
+			List<Map<String, String>> listOfCams=new ArrayList<Map<String, String>>();
+		for(int i=1;i<=6;i++){
+		Map<String, String> object=new HashMap<String, String>();
+		object.put("name","Camera"+i);
+		object.put("value", "faux_camera"+i);
+		listOfCams.add(object);
+		}
+		return new ResponseEntity<>(new ResponesObject(200,"success","Successfully loaded information",listOfCams),HttpStatus.OK);
+		}
+		catch(Exception e) {
+			return new ResponseEntity<>(new ResponesObject(200,"error",e.getMessage(),null),HttpStatus.OK);
+		}
+	}
 }

@@ -10,4 +10,6 @@ public ResponseEntity<?> getRecordInfoList(String cameraName, String starDate, S
 public ResponseEntity<?> getSourceVideo(String sourcePath);
 
 public ResponseEntity<?> getListOfVideoPath(String subPath);
+
+public ResponseEntity<?> getListOfCams();
 }
