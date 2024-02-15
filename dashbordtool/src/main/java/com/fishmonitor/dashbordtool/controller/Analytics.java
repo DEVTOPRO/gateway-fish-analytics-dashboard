@@ -15,7 +15,7 @@ import com.fishmonitor.dashbordtool.services.AnalyticsInfo;
 public class Analytics {
 
 	private AnalyticsInfo analyticsInfo;
-	
+	//test
 	@Autowired
 	public Analytics(AnalyticsInfo analyticsInfo) {
 		this.analyticsInfo=analyticsInfo;
