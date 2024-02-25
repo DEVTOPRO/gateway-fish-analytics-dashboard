@@ -1,13 +1,20 @@
-# For Java 17, use a JDK 17 base image
-FROM amazoncorretto:17.0.7-alpine
 
-# Refer to Maven build -> finalName
-ARG JAR_FILE=target/dashbordtool-0.0.1-SNAPSHOT.jar
-# cd /opt/app
-WORKDIR /opt/app
+# Use Maven 3.8.3 with OpenJDK 17 for deployment
+FROM maven:3.8.3-openjdk-17 AS build
 
-# cp target/spring-boot-web.jar /opt/app/app.jar
-COPY ${JAR_FILE} app.jar
+# Copy the source code and the pom.xml file
+COPY src /app/src
+COPY pom.xml /app
 
-# java -jar /opt/app/app.jar
-ENTRYPOINT ["java","-jar","app.jar"]
+# Build the application
+RUN mvn -f /app/pom.xml clean package -DskipTests
+
+# Use OpenJDK 17 for the runtime environment
+FROM openjdk:17
+
+# Copy the JAR file built in the previous stage
+COPY --from=build /app/target/dashbordtool-0.0.1-SNAPSHOT.jar /app/dashbordtool-0.0.1-SNAPSHOT.jar
+EXPOSE 8090
+
+# Define the command to run the application
+CMD ["java", "-jar", "/app/dashbordtool-0.0.1-SNAPSHOT.jar"]
