@@ -39,7 +39,7 @@ import com.fishmonitor.dashbordtool.utilitys.FileInfo;
 public class RecordingInfoImp implements RecordingMeth {
 
 	RestTemplate restTemplate = new RestTemplate();
-	public static String fileRootPath = "D:/Frigate-NVR-Streamer/media";
+	public static String fileRootPath = "/media/frigate";
 
 	public static String buildPath(String... pathElements) {
 		if (pathElements.length == 0) {
@@ -65,7 +65,7 @@ public class RecordingInfoImp implements RecordingMeth {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		HttpEntity<Object> requestEntity = new HttpEntity<>(headers);
-		String url = "http://localhost:5000/api/%s/recordings/summary";
+		String url = "http://frigate:5000/api/%s/recordings/summary";
 		HashMap<Object, Object> map = new HashMap<Object, Object>();
 		try {
 		ResponseEntity<String> responesData = restTemplate.exchange(String.format(url, cameraName), HttpMethod.GET,
