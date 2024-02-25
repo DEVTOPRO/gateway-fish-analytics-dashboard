@@ -39,7 +39,7 @@ import com.fishmonitor.dashbordtool.utilitys.FileInfo;
 public class RecordingInfoImp implements RecordingMeth {
 
 	RestTemplate restTemplate = new RestTemplate();
-	public static String fileRootPath = "C:/Users/konda/Downloads/Frigate-NVR-Streamer/Frigate-NVR-Streamer/media";
+	public static String fileRootPath = "D:/Frigate-NVR-Streamer/media";
 
 	public static String buildPath(String... pathElements) {
 		if (pathElements.length == 0) {

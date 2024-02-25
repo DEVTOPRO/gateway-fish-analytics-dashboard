@@ -1,40 +1,23 @@
 package com.fishmonitor.dashbordtool.models;
 
 import jakarta.persistence.*;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Entity
+@Entity 
+@Data
+@NoArgsConstructor
+@Table(name = "file_Repo")
 public class ZipFileEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    private String originalFilename;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public byte[] getContent() {
-        return content;
-    }
-
-    public void setContent(byte[] content) {
-        this.content = content;
-    }
-
-    public void setOriginalFilename(String originalFilename) {
-        this.originalFilename = originalFilename;
-    }
-    public String getOriginalFilename() {
-        return originalFilename;
-    }
+    @Column(name="user_id")
+    private String userId;
+    private String originalFilename; 
     @Lob
     @Column(columnDefinition = "LONGBLOB")
     private byte[] content;
-
 
 }
