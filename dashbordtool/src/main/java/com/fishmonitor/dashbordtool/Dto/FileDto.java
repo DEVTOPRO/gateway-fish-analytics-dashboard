@@ -13,5 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class FileDto {
 private String userId;
+private String originalFilename;
+private byte[] content;
 private MultipartFile[] files;
 }

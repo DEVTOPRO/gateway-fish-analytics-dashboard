@@ -12,5 +12,6 @@ import com.fishmonitor.dashbordtool.Dto.FileDto;
 public interface FileDataServicer {
 
 	ResponseEntity<?> fileServiceUploader(FileDto fileDto);
+	ResponseEntity<?> getAllZipFiles(int count);
 
 }
