@@ -8,10 +8,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fishmonitor.dashbordtool.Dto.FileDto;
+import com.fishmonitor.dashbordtool.Dto.SampleFileDto;
 
 public interface FileDataServicer {
 
-	ResponseEntity<?> fileServiceUploader(FileDto fileDto);
+	//ResponseEntity<?> fileServiceUploader(FileDto fileDto);
 	ResponseEntity<?> getAllZipFiles(int count);
+	ResponseEntity<?> fileServiceUploader(SampleFileDto sampleFileDto);
 
 }

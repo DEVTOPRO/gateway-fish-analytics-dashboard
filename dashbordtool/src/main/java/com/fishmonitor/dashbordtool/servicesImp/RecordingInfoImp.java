@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,7 +42,7 @@ public class RecordingInfoImp implements RecordingMeth {
 	RestTemplate restTemplate = new RestTemplate();
 	public static String fileRootPath = "/media/frigate";
 
-	public static String buildPath(String... pathElements) {
+	public static String buildPath(String ... pathElements) {
 		if (pathElements.length == 0) {
 			throw new IllegalArgumentException("At least two paths are required.");
 		}
@@ -68,8 +69,7 @@ public class RecordingInfoImp implements RecordingMeth {
 		String url = "http://frigate:5000/api/%s/recordings/summary";
 		HashMap<Object, Object> map = new HashMap<Object, Object>();
 		try {
-		ResponseEntity<String> responesData = restTemplate.exchange(String.format(url, cameraName), HttpMethod.GET,
-				requestEntity, String.class);
+		ResponseEntity<String> responesData = restTemplate.exchange(String.format(url, cameraName), HttpMethod.GET,requestEntity, String.class);
 		String userInfo = responesData.getBody();
 		ObjectMapper objectMapper = new ObjectMapper();
 		try {
@@ -151,10 +151,10 @@ public class RecordingInfoImp implements RecordingMeth {
 	public ResponseEntity<?> getListOfCams(){
 		try {
 			List<Map<String, String>> listOfCams=new ArrayList<Map<String, String>>();
-		for(int i=1;i<=6;i++){
+		for(int i=1;i<=4;i++){
 		Map<String, String> object=new HashMap<String, String>();
 		object.put("name","Camera"+i);
-		object.put("value", "faux_camera"+i);
+		object.put("value", "faux_camera1");
 		listOfCams.add(object);
 		}
 		return new ResponseEntity<>(new ResponesObject(200,"success","Successfully loaded information",listOfCams),HttpStatus.OK);

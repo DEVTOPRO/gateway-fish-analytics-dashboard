@@ -26,7 +26,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.fishmonitor.dashbordtool.Dto.FileDto;
 import com.fishmonitor.dashbordtool.Dto.ResponesObject;
+import com.fishmonitor.dashbordtool.Dto.SampleFileDto;
+import com.fishmonitor.dashbordtool.models.AnnotationEntity;
 import com.fishmonitor.dashbordtool.models.ZipFileEntity;
+import com.fishmonitor.dashbordtool.repos.AnnotationFileRepo;
 import com.fishmonitor.dashbordtool.repos.ZipFilerepos;
 import com.fishmonitor.dashbordtool.services.FileDataServicer;
 import org.webjars.NotFoundException;
@@ -36,53 +39,48 @@ import org.webjars.NotFoundException;
 public class FileDataServicerImp implements FileDataServicer {
 
 	private ZipFilerepos zipFilerepos;
+	private AnnotationFileRepo annotationRepo;
 
 	@Autowired
-	public FileDataServicerImp(ZipFilerepos zipFilerepos) {
+	public FileDataServicerImp(ZipFilerepos zipFilerepos,AnnotationFileRepo annotationRepo) {
 		this.zipFilerepos = zipFilerepos;
+		this.annotationRepo=annotationRepo;
 	}
 
-	public ResponseEntity<?> fileServiceUploader(FileDto fileDto) {
-		if (fileDto.getFiles().length < 1) {
-			new ResponseEntity<>(new ResponesObject(400, "error", "Please Upload file", null), HttpStatus.BAD_REQUEST);
+	public ResponseEntity<?> fileServiceUploader(SampleFileDto sampleFileDto) {
+		AnnotationEntity annotationEntity = new AnnotationEntity();
+		System.out.println("if"+sampleFileDto.getMediaFileName()+"  "+ sampleFileDto.getXmlName());
+		try {
+		if (!sampleFileDto.getMediaFileName().equalsIgnoreCase(sampleFileDto.getXmlName())) {
+			return new ResponseEntity<>(new ResponesObject(400, "error", "Please upload the file with same name", null), HttpStatus.BAD_REQUEST);
 		} else {
-			try {
-				List<ZipFileEntity> fileList = new ArrayList<ZipFileEntity>();
-				for (MultipartFile fileinfo : fileDto.getFiles()) {
-					ZipFileEntity zipFileEntity = new ZipFileEntity();
-					if (!fileinfo.getContentType().equals("application/zip")
-							|| !fileinfo.getOriginalFilename().endsWith("zip")) {
-						return new ResponseEntity<>(new ResponesObject(500, "error",
-								"Invalid file format. Please upload a ZIP file.", null), HttpStatus.BAD_REQUEST);
-					}
-
+				if (!sampleFileDto.getSpeciesType().isEmpty()&&!sampleFileDto.getUserId().isEmpty()) {
+					annotationEntity.setImageFileName(sampleFileDto.getMediaFileName());
+					annotationEntity.setUserId(sampleFileDto.getUserId());
+					annotationEntity.setXmlFileName(sampleFileDto.getXmlName());
 					try {
-						zipFileEntity.setContent(fileinfo.getBytes());
-					} catch (IOException e) {
-						// Handle the IOException
-						e.printStackTrace();
+					annotationEntity.setMediaFile(sampleFileDto.getMediaFile().getBytes());
+					annotationEntity.setXmlFile(sampleFileDto.getXmlFile().getBytes());
+					}catch(IOException e) {
+						return new ResponseEntity<>(new ResponesObject(500,"error","File Content error, Please upload the proper files",null),HttpStatus.BAD_REQUEST);
 					}
-					zipFileEntity.setOriginalFilename(fileinfo.getOriginalFilename());
-					fileList.add(zipFileEntity);
-				}
-
-				if (!fileList.isEmpty() && fileList.size() > 0) {
+					annotationEntity.setTypeOfSpecies(sampleFileDto.getSpeciesType());
 					System.out.println("Data base call");
-					zipFilerepos.saveAll(fileList);
+					annotationRepo.save(annotationEntity);
+					return new ResponseEntity<>(new ResponesObject(200, "success", "successfully loaded", annotationEntity),
+							HttpStatus.OK);
 				} else {
 					return new ResponseEntity<>(new ResponesObject(500, "error", "Bad request", null),
 							HttpStatus.BAD_REQUEST);
 				}
-				return new ResponseEntity<>(new ResponesObject(200, "success", "successfully loaded", fileList),
-						HttpStatus.OK);
-
-			} catch (Exception e) {
+		}
+		} catch (Exception e) {
 				new ResponseEntity<>(new ResponesObject(500, "error", e.getMessage(), null), HttpStatus.BAD_REQUEST);
 			}
 
-		}
 		return null;
 	}
+	
 	@Override
 	public ResponseEntity<?> getAllZipFiles(int count) {
 		try {

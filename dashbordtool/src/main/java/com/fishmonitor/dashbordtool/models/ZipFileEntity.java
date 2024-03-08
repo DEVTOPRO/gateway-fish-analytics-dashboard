@@ -1,5 +1,10 @@
 package com.fishmonitor.dashbordtool.models;
 
+import java.util.Date;
+
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Data;
@@ -19,5 +24,7 @@ public class ZipFileEntity {
     @Lob
     @Column(columnDefinition = "LONGBLOB")
     private byte[] content;
-
+    
 }
+
+
