@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
@@ -23,7 +24,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.multipart.MultipartFile;
-
+import java.io.ByteArrayOutputStream;
 import com.fishmonitor.dashbordtool.Dto.FileDto;
 import com.fishmonitor.dashbordtool.Dto.ResponesObject;
 import com.fishmonitor.dashbordtool.Dto.SampleFileDto;
@@ -80,7 +81,121 @@ public class FileDataServicerImp implements FileDataServicer {
 
 		return null;
 	}
-	
+/*
+	@Override
+	public ResponseEntity<?> retrieveAndZipData() {
+		try {
+			List<AnnotationEntity> annotationEntities = annotationRepo.findAll();
+
+			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+			ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream);
+
+			// Create directories for XML and image files
+			zipOutputStream.putNextEntry(new ZipEntry("XML_Files/"));
+			zipOutputStream.closeEntry();
+			zipOutputStream.putNextEntry(new ZipEntry("Image_Files/"));
+			zipOutputStream.closeEntry();
+
+			// Adding XML files to the zip file
+			for (AnnotationEntity entity : annotationEntities) {
+				zipOutputStream.putNextEntry(new ZipEntry("XML_Files/" + entity.getXmlFileName()));
+				zipOutputStream.write(entity.getXmlFile());
+				zipOutputStream.closeEntry();
+			}
+
+			// Adding image files to the zip file
+			for (AnnotationEntity entity : annotationEntities) {
+				zipOutputStream.putNextEntry(new ZipEntry("Image_Files/" + entity.getImageFileName()));
+				zipOutputStream.write(entity.getMediaFile());
+				zipOutputStream.closeEntry();
+			}
+
+			zipOutputStream.close();
+			outputStream.close();
+
+			byte[] zipBytes = outputStream.toByteArray();
+
+			HttpHeaders headers = new HttpHeaders();
+			headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+			headers.setContentDispositionFormData("filename", "data.zip");
+
+			return new ResponseEntity<>(zipBytes, headers, HttpStatus.OK);
+		} catch (IOException e) {
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+
+*/
+@Override
+public ResponseEntity<?> retrieveAndZipData() {
+	try {
+		List<AnnotationEntity> annotationEntities = annotationRepo.findAll();
+
+		// Grouping files by species_name
+		Map<String, List<AnnotationEntity>> groupedEntities = annotationEntities.stream()
+				.collect(Collectors.groupingBy(AnnotationEntity::getTypeOfSpecies));
+
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream);
+
+		// Creating zip files for each species
+		for (Map.Entry<String, List<AnnotationEntity>> entry : groupedEntities.entrySet()) {
+			String speciesName = entry.getKey();
+			List<AnnotationEntity> speciesEntities = entry.getValue();
+
+			// Create directory for current species
+			zipOutputStream.putNextEntry(new ZipEntry(speciesName + "/"));
+			zipOutputStream.closeEntry();
+
+			// Adding XML files to the zip file
+			ByteArrayOutputStream xmlOutputStream = new ByteArrayOutputStream();
+			ZipOutputStream xmlZipOutputStream = new ZipOutputStream(xmlOutputStream);
+			for (AnnotationEntity entity : speciesEntities) {
+				xmlZipOutputStream.putNextEntry(new ZipEntry(entity.getXmlFileName()));
+				xmlZipOutputStream.write(entity.getXmlFile());
+				xmlZipOutputStream.closeEntry();
+			}
+			xmlZipOutputStream.close();
+			byte[] xmlZipBytes = xmlOutputStream.toByteArray();
+
+			// Adding image files to the zip file
+			ByteArrayOutputStream imageOutputStream = new ByteArrayOutputStream();
+			ZipOutputStream imageZipOutputStream = new ZipOutputStream(imageOutputStream);
+			for (AnnotationEntity entity : speciesEntities) {
+				imageZipOutputStream.putNextEntry(new ZipEntry(entity.getImageFileName()));
+				imageZipOutputStream.write(entity.getMediaFile());
+				imageZipOutputStream.closeEntry();
+			}
+			imageZipOutputStream.close();
+			byte[] imageZipBytes = imageOutputStream.toByteArray();
+
+			// Add XML zip file to the main zip file
+			zipOutputStream.putNextEntry(new ZipEntry(speciesName + "/xml_files.zip"));
+			zipOutputStream.write(xmlZipBytes);
+			zipOutputStream.closeEntry();
+
+			// Add image zip file to the main zip file
+			zipOutputStream.putNextEntry(new ZipEntry(speciesName + "/image_files.zip"));
+			zipOutputStream.write(imageZipBytes);
+			zipOutputStream.closeEntry();
+		}
+
+		zipOutputStream.close();
+		outputStream.close();
+
+		byte[] zipBytes = outputStream.toByteArray();
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+		headers.setContentDispositionFormData("filename", "data.zip");
+
+		return new ResponseEntity<>(zipBytes, headers, HttpStatus.OK);
+	} catch (IOException e) {
+		return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+}
+
 	@Override
 	public ResponseEntity<?> getAllZipFiles(int count) {
 		try {

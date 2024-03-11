@@ -26,23 +26,29 @@ import io.swagger.models.Response;
 public class FileDataController {
 
 	private FileDataServicer fileDataServicer;
-	
+
 	@Autowired
 	public  FileDataController(FileDataServicer fileDataServicer) {
 		this.fileDataServicer=fileDataServicer;
 	}
-	
+
 	@PostMapping(value="/zipFileUpload")
 	public ResponseEntity<?> fileUploader(@RequestPart("sampleFileDto") SampleFileDto sampleFileDto,@RequestPart("mediaFile") MultipartFile mediaFile, @RequestPart("xmlFile") MultipartFile xmlFile){
 		System.out.println("fullname"+mediaFile.getOriginalFilename()+"General name "+mediaFile.getName());
 		if(mediaFile.getOriginalFilename().endsWith(".png") && xmlFile.getOriginalFilename().endsWith(".xml")) {
 			sampleFileDto.setMediaFile(mediaFile);
 			sampleFileDto.setXmlFile(xmlFile);
-		return fileDataServicer.fileServiceUploader(sampleFileDto); 
+		return fileDataServicer.fileServiceUploader(sampleFileDto);
 		}else {
 			return new ResponseEntity<>(new ResponesObject(400, "error", "Please Uploade your file with an expected formate", null), HttpStatus.BAD_REQUEST);
 		}
-	} 
+	}
+
+	@GetMapping("/retrieveAndZipData")
+	public ResponseEntity<?> retrieveAndZipData() {
+
+		return fileDataServicer.retrieveAndZipData();
+	}
 	@GetMapping(value = "/zipFiles")
 	public ResponseEntity<?> getAllZipFiles(@RequestParam("count") int count) {
 		return fileDataServicer.getAllZipFiles(count);

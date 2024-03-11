@@ -16,4 +16,6 @@ public interface FileDataServicer {
 	ResponseEntity<?> getAllZipFiles(int count);
 	ResponseEntity<?> fileServiceUploader(SampleFileDto sampleFileDto);
 
+
+	ResponseEntity<?> retrieveAndZipData();
 }
