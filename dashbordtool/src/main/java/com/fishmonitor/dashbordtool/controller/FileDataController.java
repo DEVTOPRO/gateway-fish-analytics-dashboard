@@ -46,7 +46,6 @@ public class FileDataController {
 
 	@GetMapping("/retrieveAndZipData")
 	public ResponseEntity<?> retrieveAndZipData() {
-
 		return fileDataServicer.retrieveAndZipData();
 	}
 	@GetMapping(value = "/zipFiles")
@@ -54,9 +53,4 @@ public class FileDataController {
 		return fileDataServicer.getAllZipFiles(count);
 	}
 	
-	@PostMapping(value="/fileuploader")
-	public ResponseEntity<?> fileSaver(@RequestPart("sampleFileDto")SampleFileDto sampleFileDto,@RequestPart("mediaFile") MultipartFile mediaFile){
-		System.out.println(sampleFileDto.toString());
-		return null;
-	}
 }
