@@ -9,8 +9,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
@@ -30,11 +32,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fishmonitor.dashbordtool.Dto.HourSummaryDTO;
 import com.fishmonitor.dashbordtool.Dto.RecordSummaryDTO;
 import com.fishmonitor.dashbordtool.Dto.ResponesObject;
+import com.fishmonitor.dashbordtool.Dto.SpeciestypeDto;
+import com.fishmonitor.dashbordtool.models.SpeciestypesEntity;
+import com.fishmonitor.dashbordtool.repos.Speciesrepo;
 import com.fishmonitor.dashbordtool.services.RecordingMeth;
 import com.fishmonitor.dashbordtool.utilitys.FileInfo;
 
 @Service
 public class RecordingInfoImp implements RecordingMeth {
+	@Autowired
+	private Speciesrepo speciesRepo;
 
 	RestTemplate restTemplate = new RestTemplate();
 	public static String fileRootPath = "/media/frigate";
@@ -196,6 +203,53 @@ public class RecordingInfoImp implements RecordingMeth {
 					new ResponesObject(200, "success", "Successfully loaded information", listOfCams), HttpStatus.OK);
 		} catch (Exception e) {
 			return new ResponseEntity<>(new ResponesObject(200, "error", e.getMessage(), null), HttpStatus.OK);
+		}
+	}
+
+	@Override
+	public ResponseEntity<?> getTypeOfSpecies() {
+		// TODO Auto-generated method stub
+		try {
+			List<SpeciestypeDto> speciesData = speciesRepo.findAllData();
+			return new ResponseEntity<>(new ResponesObject(200, "success", "Successfully loaded Data", speciesData),
+					HttpStatus.ACCEPTED);
+		} catch (Exception e) {
+			return new ResponseEntity<>(new ResponesObject(500, "error", e.getMessage(), null),
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	@Override
+	public ResponseEntity<?> createSpeciesType(SpeciestypeDto speciesTypeDto) {
+		// TODO Auto-generated method stub
+		try {
+		if (speciesTypeDto!=null&&!speciesTypeDto.getSpeciesValue().isBlank()) {
+			Optional<SpeciestypesEntity>  speciesUpdateData = speciesRepo
+						.getByUpdateSpeciesDetails(speciesTypeDto.getSpeciesValue());
+				if (speciesTypeDto.isUpdateKey() && speciesUpdateData.isPresent()
+						&& speciesTypeDto.getSpeciesValue().compareTo(speciesUpdateData.get().getSpeciesValue()) == 0) {
+					speciesRepo.findByUpdateSpeciesDetails(speciesTypeDto.getSpeciesKey(),
+							speciesTypeDto.getSpeciesValue());
+					return new ResponseEntity<>(
+							new ResponesObject(200, "success", "Successfully updated Species Name", "updaetd"),
+							HttpStatus.OK);
+				} else {
+				if(speciesUpdateData.isPresent()&&speciesTypeDto.getSpeciesValue().compareTo(speciesUpdateData.get().getSpeciesValue())==0) return new ResponseEntity<>(new ResponesObject(201, "success", "Species is already exist",null ),HttpStatus.ALREADY_REPORTED);
+					SpeciestypesEntity speciesCreationData = SpeciestypesEntity.builder()
+							.speciesKey(speciesTypeDto.getSpeciesKey()).speciesValue(speciesTypeDto.getSpeciesValue())
+							.status(1).build();
+					speciesRepo.save(speciesCreationData);
+					return new ResponseEntity<>(
+							new ResponesObject(200, "success", "Successfully Added Species", speciesCreationData),
+							HttpStatus.OK);
+				}
+			}
+			return new ResponseEntity<>(new ResponesObject(400, "error", "Please give an expected request", null),
+					HttpStatus.BAD_REQUEST);
+		} catch (Exception e) {
+			return new ResponseEntity<>(new ResponesObject(500, "error", e.getMessage(), null),
+					HttpStatus.INTERNAL_SERVER_ERROR);
+
 		}
 	}
 }
