@@ -7,7 +7,7 @@ public class DashbordtoolApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(DashbordtoolApplication.class, args);
-		System.out.println("Jai sri ram");
+		System.out.println("Jai sri ram ..");
 	}
 	
 
