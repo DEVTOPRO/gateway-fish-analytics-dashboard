@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.mail.Multipart;
 
+import com.fishmonitor.dashbordtool.models.AnnotationEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -17,5 +18,5 @@ public interface FileDataServicer {
 	ResponseEntity<?> fileServiceUploader(SampleFileDto sampleFileDto);
 
 
-	ResponseEntity<?> retrieveAndZipData();
+	byte[] createZipFile(List<AnnotationEntity> annotationEntities);
 }

@@ -1,9 +1,12 @@
 package com.fishmonitor.dashbordtool.controller;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.fishmonitor.dashbordtool.ExceptionHandling.FileNotFoundException;
+import com.fishmonitor.dashbordtool.models.AnnotationEntity;
+import com.fishmonitor.dashbordtool.repos.AnnotationFileRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -25,11 +28,12 @@ import io.swagger.models.Response;
 @RequestMapping("/fileRepoInformation")
 public class FileDataController {
 
-	private FileDataServicer fileDataServicer;
+	private final AnnotationFileRepo annotationRepo;
+	private final FileDataServicer fileDataServicer;
 
-	@Autowired
-	public  FileDataController(FileDataServicer fileDataServicer) {
-		this.fileDataServicer=fileDataServicer;
+	public FileDataController(AnnotationFileRepo annotationRepo, FileDataServicer fileDataServicer) {
+		this.annotationRepo = annotationRepo;
+		this.fileDataServicer = fileDataServicer;
 	}
 
 	@PostMapping(value="/zipFileUpload")
@@ -44,10 +48,16 @@ public class FileDataController {
 		}
 	}
 
-	@GetMapping("/retrieveAndZipData")
-	public ResponseEntity<?> retrieveAndZipData() {
-		return fileDataServicer.retrieveAndZipData();
-	}
+	@GetMapping("/downloadFiles")
+	public ResponseEntity<byte[]> downloadFiles() {
+        List<AnnotationEntity> annotationEntities = annotationRepo.findAll();
+        byte[] zipBytes = fileDataServicer.createZipFile(annotationEntities);
+        return ResponseEntity
+                .ok()
+                .header("Content-Disposition", "attachment; filename=files.zip")
+                .body(zipBytes);
+    }
+
 	@GetMapping(value = "/zipFiles")
 	public ResponseEntity<?> getAllZipFiles(@RequestParam("count") int count) {
 		return fileDataServicer.getAllZipFiles(count);
