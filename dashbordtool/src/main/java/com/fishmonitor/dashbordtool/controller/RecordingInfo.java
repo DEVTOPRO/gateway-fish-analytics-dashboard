@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fishmonitor.dashbordtool.Dto.SpeciesCreationDto;
 import com.fishmonitor.dashbordtool.Dto.SpeciestypeDto;
 import com.fishmonitor.dashbordtool.services.RecordingMeth;
 
@@ -55,7 +56,8 @@ public class RecordingInfo {
 	}
 
 	@PostMapping(value = "/creatSpecies")
-	public ResponseEntity<?> createSpeciesType(@Valid @RequestBody SpeciestypeDto speciesTypeDto) {
-		return recordingMeth.createSpeciesType(speciesTypeDto);
+	public ResponseEntity<?> createSpeciesType(@RequestBody SpeciesCreationDto speciesCreationDto ) {
+		System.out.println(speciesCreationDto.isUpdateKey());
+		return recordingMeth.createSpeciesType(speciesCreationDto);
 	}
 }

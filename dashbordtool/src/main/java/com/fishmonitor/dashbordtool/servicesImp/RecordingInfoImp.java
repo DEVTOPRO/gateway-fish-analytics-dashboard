@@ -32,6 +32,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fishmonitor.dashbordtool.Dto.HourSummaryDTO;
 import com.fishmonitor.dashbordtool.Dto.RecordSummaryDTO;
 import com.fishmonitor.dashbordtool.Dto.ResponesObject;
+import com.fishmonitor.dashbordtool.Dto.SpeciesCreationDto;
 import com.fishmonitor.dashbordtool.Dto.SpeciestypeDto;
 import com.fishmonitor.dashbordtool.models.SpeciestypesEntity;
 import com.fishmonitor.dashbordtool.repos.Speciesrepo;
@@ -220,27 +221,28 @@ public class RecordingInfoImp implements RecordingMeth {
 	}
 
 	@Override
-	public ResponseEntity<?> createSpeciesType(SpeciestypeDto speciesTypeDto) {
+	public ResponseEntity<?> createSpeciesType(SpeciesCreationDto speciesCreationDto) {
 		// TODO Auto-generated method stub
 		try {
-		if (speciesTypeDto!=null&&!speciesTypeDto.getSpeciesValue().isBlank()) {
+		if (speciesCreationDto!=null&&!speciesCreationDto.getSpeciesValue().isBlank()) {
 			Optional<SpeciestypesEntity>  speciesUpdateData = speciesRepo
-						.getByUpdateSpeciesDetails(speciesTypeDto.getSpeciesValue());
-				if (speciesTypeDto.isUpdateKey() && speciesUpdateData.isPresent()
-						&& speciesTypeDto.getSpeciesValue().compareTo(speciesUpdateData.get().getSpeciesValue()) == 0) {
-					speciesRepo.findByUpdateSpeciesDetails(speciesTypeDto.getSpeciesKey(),
-							speciesTypeDto.getSpeciesValue());
+						.getByUpdateSpeciesDetails(speciesCreationDto.getSpeciesValue());
+			System.out.println("check"+speciesCreationDto.isUpdateKey() );
+				if (speciesCreationDto.isUpdateKey() && speciesUpdateData.isPresent()
+						&& speciesCreationDto.getSpeciesValue().compareTo(speciesUpdateData.get().getSpeciesValue()) == 0) {
+					speciesRepo.findByUpdateSpeciesDetails(speciesCreationDto.getSpeciesKey(),
+							speciesCreationDto.getSpeciesValue());
 					return new ResponseEntity<>(
-							new ResponesObject(200, "success", "Successfully updated Species Name", "updaetd"),
+							new ResponesObject(200, "success", "Successfully updated Species Name", speciesRepo.findAllData()),
 							HttpStatus.OK);
 				} else {
-				if(speciesUpdateData.isPresent()&&speciesTypeDto.getSpeciesValue().compareTo(speciesUpdateData.get().getSpeciesValue())==0) return new ResponseEntity<>(new ResponesObject(201, "success", "Species is already exist",null ),HttpStatus.ALREADY_REPORTED);
+				if(speciesUpdateData.isPresent()&&speciesCreationDto.getSpeciesValue().compareTo(speciesUpdateData.get().getSpeciesValue())==0) return new ResponseEntity<>(new ResponesObject(201, "error", "Species is already exist",null ),HttpStatus.ALREADY_REPORTED);
 					SpeciestypesEntity speciesCreationData = SpeciestypesEntity.builder()
-							.speciesKey(speciesTypeDto.getSpeciesKey()).speciesValue(speciesTypeDto.getSpeciesValue())
+							.speciesKey(speciesCreationDto.getSpeciesKey()).speciesValue(speciesCreationDto.getSpeciesValue())
 							.status(1).build();
 					speciesRepo.save(speciesCreationData);
 					return new ResponseEntity<>(
-							new ResponesObject(200, "success", "Successfully Added Species", speciesCreationData),
+							new ResponesObject(200, "success", "Successfully Added Species", speciesRepo.findAllData()),
 							HttpStatus.OK);
 				}
 			}

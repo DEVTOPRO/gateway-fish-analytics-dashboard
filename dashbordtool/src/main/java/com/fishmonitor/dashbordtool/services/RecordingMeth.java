@@ -2,6 +2,7 @@ package com.fishmonitor.dashbordtool.services;
 
 import org.springframework.http.ResponseEntity;
 
+import com.fishmonitor.dashbordtool.Dto.SpeciesCreationDto;
 import com.fishmonitor.dashbordtool.Dto.SpeciestypeDto;
 
 public interface RecordingMeth {
@@ -17,5 +18,5 @@ public ResponseEntity<?> getListOfCams();
 
 public ResponseEntity<?> getTypeOfSpecies();
 
-public ResponseEntity<?> createSpeciesType(SpeciestypeDto speciesTypeDto);
+public ResponseEntity<?> createSpeciesType(SpeciesCreationDto speciesCreationDto);
 }
