@@ -60,4 +60,5 @@ public class RecordingInfo {
 		System.out.println(speciesCreationDto.isUpdateKey());
 		return recordingMeth.createSpeciesType(speciesCreationDto);
 	}
+
 }

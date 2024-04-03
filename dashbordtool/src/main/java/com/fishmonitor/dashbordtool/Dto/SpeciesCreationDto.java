@@ -18,6 +18,7 @@ public class SpeciesCreationDto {
 	@NotNull
 	@NotBlank
 	private String speciesValue;
+	
 	 public void setIsUpdateKey(boolean isUpdateKey) {
 	        this.isUpdateKey = isUpdateKey;
 	    }
