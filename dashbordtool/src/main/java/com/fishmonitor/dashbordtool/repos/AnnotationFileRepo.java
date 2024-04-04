@@ -5,7 +5,10 @@ import org.springframework.stereotype.Repository;
 
 import com.fishmonitor.dashbordtool.models.AnnotationEntity;
 
+import java.util.List;
+
 @Repository
 public interface AnnotationFileRepo extends JpaRepository<AnnotationEntity, Long> {
 
+    List<AnnotationEntity> findByTypeOfSpecies(String speciesName);
 }

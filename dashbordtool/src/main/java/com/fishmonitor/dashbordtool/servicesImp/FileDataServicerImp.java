@@ -176,7 +176,11 @@ public class FileDataServicerImp implements FileDataServicer {
 			return handleInternalServerError();
 		}
 	}
-
+	@Override
+	public byte[] createZipFileForSpecies(String speciesName) {
+		List<AnnotationEntity> annotationEntities = annotationRepo.findByTypeOfSpecies(speciesName);
+		return createZipFile(annotationEntities);
+	}
 	private ResponseEntity<?> handleIllegalArgumentException(String errorMessage) {
 		return new ResponseEntity<>(new ResponesObject(400, "error", errorMessage, null), HttpStatus.BAD_REQUEST);
 	}

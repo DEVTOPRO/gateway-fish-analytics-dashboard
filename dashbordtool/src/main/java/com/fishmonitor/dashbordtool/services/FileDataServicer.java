@@ -19,4 +19,6 @@ public interface FileDataServicer {
 
 
 	byte[] createZipFile(List<AnnotationEntity> annotationEntities);
+	byte[] createZipFileForSpecies(String speciesName);
+
 }

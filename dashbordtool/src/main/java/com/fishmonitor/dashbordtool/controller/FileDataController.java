@@ -57,7 +57,15 @@ public class FileDataController {
                 .header("Content-Disposition", "attachment; filename=files.zip")
                 .body(zipBytes);
     }
-
+	@GetMapping("/downloadFiles/{speciesName}")
+	public ResponseEntity<byte[]> downloadFilesBySpecies(@PathVariable String speciesName) {
+		List<AnnotationEntity> annotationEntities = annotationRepo.findByTypeOfSpecies(speciesName);
+		byte[] zipBytes = fileDataServicer.createZipFile(annotationEntities);
+		return ResponseEntity
+				.ok()
+				.header("Content-Disposition", "attachment; filename=" + speciesName + "_files.zip")
+				.body(zipBytes);
+	}
 	@GetMapping(value = "/zipFiles")
 	public ResponseEntity<?> getAllZipFiles(@RequestParam("count") int count) {
 		return fileDataServicer.getAllZipFiles(count);
